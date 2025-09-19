@@ -27,8 +27,8 @@ public class GameServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nodeId = getCookieValue(req, CURRENT_NODE);
 
-        GameNode currentNode = nodeId != null
-                ? Tree.findNodeById(Tree.ROOT, nodeId)
+        GameNode currentNode = nodeId != null ?
+                Tree.findNodeById(Tree.ROOT, nodeId)
                 : null;
 
         if (currentNode == null) {

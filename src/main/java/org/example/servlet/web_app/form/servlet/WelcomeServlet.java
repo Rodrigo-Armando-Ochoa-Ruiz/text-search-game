@@ -46,6 +46,9 @@ public class WelcomeServlet extends HttpServlet {
             req.getRequestDispatcher(WELCOME_PAGE).forward(req,resp);
             return;
         }
+
+        //HttpSession session = req.getSession();
+        //session.setAttribute("playerName", playerName);
         List<Cookie> dataCookies = List.of(
                 new Cookie(PLAYER_NAME, URLEncoder.encode(playerName, StandardCharsets.UTF_8)),
                 new Cookie(GAMES_PLAYED, URLEncoder.encode("0", StandardCharsets.UTF_8)),

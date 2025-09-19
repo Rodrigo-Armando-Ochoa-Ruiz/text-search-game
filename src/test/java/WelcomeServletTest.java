@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.example.servlet.web_app.form.util.Constants.*;
 import static org.mockito.Mockito.*;
@@ -26,16 +29,17 @@ public class WelcomeServletTest {
 
     @Test
     void doGetWithPlayerCookieTest() throws Exception {
-        Cookie playerCookie = new Cookie(PLAYER_NAME, "Rodrigo");
+        Cookie playerCookie = new Cookie(PLAYER_NAME, URLEncoder.encode("Rodrigo", StandardCharsets.UTF_8));
         when(request.getCookies()).thenReturn(new Cookie[]{playerCookie});
         when(request.getContextPath()).thenReturn("");
 
         Method doGetMethod = WelcomeServlet.class.getDeclaredMethod("doGet", HttpServletRequest.class, HttpServletResponse.class);
         doGetMethod.setAccessible(true);
-
         doGetMethod.invoke(servlet, request, response);
 
         verify(response).sendRedirect("/game");
+
+        verify(request, never()).getRequestDispatcher(anyString());
     }
 
     @Test
@@ -50,7 +54,9 @@ public class WelcomeServletTest {
         doGetMethod.invoke(servlet, request, response);
 
         verify(dispatcher).forward(request, response);
+        verify(response, never()).sendRedirect(anyString());
     }
+
 
     @Test
     void doPostWithValidName() throws Exception {
@@ -65,6 +71,11 @@ public class WelcomeServletTest {
         verify(response).sendRedirect("/game");
 
         verify(response, times(4)).addCookie(any(Cookie.class));
+
+        verify(response).addCookie(argThat(cookie ->
+                PLAYER_NAME.equals(cookie.getName()) &&
+                        "Rodrigo".equals(URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8))
+        ));
     }
 
     @Test

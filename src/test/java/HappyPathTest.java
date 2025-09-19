@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.mockito.Mockito.*;
 
@@ -62,11 +64,21 @@ public class HappyPathTest {
 
         currentNode = new Cookie(Constants.CURRENT_NODE, "candyWizardNode");
         when(request.getCookies()).thenReturn(new Cookie[]{playerNameCookie, gamesPlayed, gamesWon, gamesLost, currentNode});
-        when(request.getParameter("choice")).thenReturn("");
+        when(request.getParameter("choice")).thenReturn("Pedir ayuda a un caramelo viviente");
         gameDoPost.invoke(gameServlet, request, response);
 
         verify(response, atLeast(3)).addCookie(any(Cookie.class));
 
         verify(response, atLeast(1)).sendRedirect("/game");
+
+        verify(response).addCookie(argThat(cookie ->
+                Constants.GAMES_WON.equals(cookie.getName()) &&
+                        "1".equals(cookie.getValue())
+        ));
+
+        verify(response).addCookie(argThat(cookie ->
+                Constants.CURRENT_NODE.equals(cookie.getName()) &&
+                        "buildGingerHouseNode".equals(URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8))
+        ));
     }
 }
